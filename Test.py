@@ -5,84 +5,56 @@ from pylab import *
 
 
 class AnnoteFinder:
-    """
-    callback for matplotlib to visit a node (display an annotation) when points are clicked on.  The
-    point which is closest to the click and within xtol and ytol is identified.
-    """
+    def __init__(self, layout, range):
+        self.data = []
+        for i in layout:
+            self.data.append((layout[i], i))
 
-    def __init__(self, xdata, ydata, annotes, axis=None, xtol=None, ytol=None):
-        self.data = list(zip(xdata, ydata, annotes))
-        if xtol is None:
-            xtol = ((max(xdata) - min(xdata)) / float(len(xdata))) / 2
-        if ytol is None:
-            ytol = ((max(ydata) - min(ydata)) / float(len(ydata))) / 2
-        self.xtol = xtol
-        self.ytol = ytol
-        if axis is None:
-            axis = gca()
-        self.axis = axis
-        self.drawnAnnotations = {}
-        self.links = []
+        self.range = range
+        self.axis = plt.gca()
+        self.selectedCircles = {}
 
     def __call__(self, event):
         if event.inaxes:
             clickX = event.xdata
             clickY = event.ydata
-            # print(dir(event), event.key)
-            if self.axis is None or self.axis == event.inaxes:
-                annotes = []
-                smallest_x_dist = float('inf')
-                smallest_y_dist = float('inf')
+            if self.axis == event.inaxes:
+                minimum_distance = float("inf")
+                selected = None
 
-                for x, y, a in self.data:
+                for (x, y), annotation in self.data:
                     dx, dy = abs(x - clickX), abs(y - clickY)
-                    if dx <= smallest_x_dist and dy <= smallest_y_dist:
-                        if dx <= self.xtol and dy <= self.ytol:
-                            annotes.append((dx * dx + dy * dy, x, y, a))
-                        smallest_x_dist = abs(clickX - x)
-                        smallest_y_dist = abs(clickY - y)
-                        # print(annotes, 'annotate')
-                    # if  clickX-self.xtol < x < clickX+self.xtol and  clickY-self.ytol < y < clickY+self.ytol :
-                    #     dx,dy=x-clickX,y-clickY
-                    #     annotes.append((dx*dx+dy*dy,x,y, a) )
-                # print(annotes, clickX, clickY, self.xtol, self.ytol)
-                if annotes:
-                    annotes.sort()  # to select the nearest node
-                    distance, x, y, annote = annotes[0]
-                    self.drawAnnote(event.inaxes, x, y, annote)
+                    distance = dx * dx + dy * dy
+                    if dx <= self.range and dy <= self.range and distance < minimum_distance:
+                        minimum_distance = distance
+                        selected = (x, y, annotation)
 
-    def drawAnnote(self, axis, x, y, annote):
-        if (x, y) in self.drawnAnnotations:
-            markers = self.drawnAnnotations[(x, y)]
-            for m in markers:
-                m.set_visible(not m.get_visible())
-            self.axis.figure.canvas.draw()
+                if selected:
+                    x, y, annotation = selected
+                    print("Selected", annotation)
+                    self.drawSelected(event.inaxes, x, y, annotation)
+
+    def drawSelected(self, axis, x, y, annote):
+        if (x, y) in self.selectedCircles:
+            circle = self.selectedCircles[(x, y)]
+            circle.set_visible(not circle.get_visible())
         else:
-            t = axis.text(x, y, "%s" % (annote), )
-            m = axis.scatter([x], [y], marker='d', c='r', zorder=100)
-            self.drawnAnnotations[(x, y)] = (t, m)
-            self.axis.figure.canvas.draw()
+            circle = axis.scatter(x+0.002, y+0.002, marker='o', s=200, linewidths=1,
+                                  facecolors='none', edgecolors='red', zorder=-100)
+            self.selectedCircles[(x, y)] = circle
 
+        self.axis.figure.canvas.draw()
 
-# Build your graph
-G = nx.petersen_graph()
-pos = nx.spring_layout(G, k=0.1,
-                       iterations=20)  # the layout gives us the nodes position x,y,annotes=[],[],[] for key in pos:
-x, y, annotes = [], [], []
-for key in pos:
-    d = pos[key]
-    annotes.append(key)
-    x.append(d[0])
-    y.append(d[1])
 
 fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111)
 ax.set_title('select nodes to navigate there')
 
-nx.draw(G, pos, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
+G = nx.petersen_graph()
+layout = nx.spring_layout(G, k=0.1, iterations=20)
+nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
         node_size=2, with_labels=True)
 
-af = AnnoteFinder(x, y, annotes, xtol=0.1, ytol=0.1)
-connect('button_press_event', af)
+plt.connect('button_press_event', AnnoteFinder(layout, range=0.1))
 
-show()
+plt.show()
