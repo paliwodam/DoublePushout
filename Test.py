@@ -12,11 +12,14 @@ class AnnoteFinder:
 
     def __init__(self, xdata, ydata, annotes, axis=None, xtol=None, ytol=None):
         self.data = list(zip(xdata, ydata, annotes))
-        if xtol is None: xtol = ((max(xdata) - min(xdata)) / float(len(xdata))) / 2
-        if ytol is None: ytol = ((max(ydata) - min(ydata)) / float(len(ydata))) / 2
+        if xtol is None:
+            xtol = ((max(xdata) - min(xdata)) / float(len(xdata))) / 2
+        if ytol is None:
+            ytol = ((max(ydata) - min(ydata)) / float(len(ydata))) / 2
         self.xtol = xtol
         self.ytol = ytol
-        if axis is None: axis = gca()
+        if axis is None:
+            axis = gca()
         self.axis = axis
         self.drawnAnnotations = {}
         self.links = []
@@ -25,23 +28,24 @@ class AnnoteFinder:
         if event.inaxes:
             clickX = event.xdata
             clickY = event.ydata
-            print(dir(event), event.key)
+            # print(dir(event), event.key)
             if self.axis is None or self.axis == event.inaxes:
                 annotes = []
                 smallest_x_dist = float('inf')
                 smallest_y_dist = float('inf')
 
                 for x, y, a in self.data:
-                    if abs(clickX - x) <= smallest_x_dist and abs(clickY - y) <= smallest_y_dist:
-                        dx, dy = x - clickX, y - clickY
-                        annotes.append((dx * dx + dy * dy, x, y, a))
+                    dx, dy = abs(x - clickX), abs(y - clickY)
+                    if dx <= smallest_x_dist and dy <= smallest_y_dist:
+                        if dx <= self.xtol and dy <= self.ytol:
+                            annotes.append((dx * dx + dy * dy, x, y, a))
                         smallest_x_dist = abs(clickX - x)
                         smallest_y_dist = abs(clickY - y)
-                        print(annotes, 'annotate')
+                        # print(annotes, 'annotate')
                     # if  clickX-self.xtol < x < clickX+self.xtol and  clickY-self.ytol < y < clickY+self.ytol :
                     #     dx,dy=x-clickX,y-clickY
                     #     annotes.append((dx*dx+dy*dy,x,y, a) )
-                print(annotes, clickX, clickY, self.xtol, self.ytol)
+                # print(annotes, clickX, clickY, self.xtol, self.ytol)
                 if annotes:
                     annotes.sort()  # to select the nearest node
                     distance, x, y, annote = annotes[0]
@@ -60,10 +64,8 @@ class AnnoteFinder:
             self.axis.figure.canvas.draw()
 
 
-df = pd.DataFrame("LOAD YOUR DATA")
-
 # Build your graph
-G = nx.from_pandas_edgelist(df, 'from', 'to')
+G = nx.petersen_graph()
 pos = nx.spring_layout(G, k=0.1,
                        iterations=20)  # the layout gives us the nodes position x,y,annotes=[],[],[] for key in pos:
 x, y, annotes = [], [], []
@@ -80,7 +82,7 @@ ax.set_title('select nodes to navigate there')
 nx.draw(G, pos, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
         node_size=2, with_labels=True)
 
-af = AnnoteFinder(x, y, annotes)
+af = AnnoteFinder(x, y, annotes, xtol=0.1, ytol=0.1)
 connect('button_press_event', af)
 
 show()
