@@ -30,7 +30,7 @@ class AnnoteFinder:
                 if selected:
                     x, y, annotation = selected
                     print("Selected", annotation)
-                    self.drawSelected(event.inaxes, x, y, annotation)
+                    self.drawSelected(event.inaxes, x, y)
 
     def drawSelected(self, axis, x, y):
         if (x, y) in self.selectedCircles:
