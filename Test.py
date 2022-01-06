@@ -1,17 +1,16 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import graphistry
 from pylab import *
 
 
 class AnnoteFinder:
-    def __init__(self, layout, range):
+    def __init__(self, layout, axis, range):
         self.data = []
         for i in layout:
             self.data.append((layout[i], i))
 
         self.range = range
-        self.axis = plt.gca()
+        self.axis = axis
         self.selectedCircles = {}
 
     def __call__(self, event):
@@ -32,6 +31,8 @@ class AnnoteFinder:
                 if selected:
                     x, y, annotation = selected
                     print("Selected", annotation)
+                    # plt.clf()
+                    # plt.show()
                     self.drawSelected(event.inaxes, x, y, annotation)
 
     def drawSelected(self, axis, x, y, annote):
@@ -43,18 +44,26 @@ class AnnoteFinder:
                                   facecolors='none', edgecolors='red', zorder=-100)
             self.selectedCircles[(x, y)] = circle
 
-        self.axis.figure.canvas.draw()
+        plt.show()
 
 
 fig = plt.figure(figsize=(10, 10))
-ax = fig.add_subplot(111)
-ax.set_title('select nodes to navigate there')
+ax1 = fig.add_subplot(1, 2, 1)
+ax2 = fig.add_subplot(1, 2, 2)
+# ax.set_title('select nodes to navigate there')
 
 G = nx.petersen_graph()
 layout = nx.spring_layout(G, k=0.1, iterations=20)
 nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
-        node_size=2, with_labels=True)
+        node_size=2, with_labels=True, ax=ax1)
 
-plt.connect('button_press_event', AnnoteFinder(layout, range=0.1))
+plt.connect('button_press_event', AnnoteFinder(layout, axis=ax1, range=0.1))
+
+G = nx.petersen_graph()
+layout = nx.spring_layout(G, k=0.1, iterations=20)
+nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
+        node_size=2, with_labels=True, ax=ax2)
+
+plt.connect('button_press_event', AnnoteFinder(layout, axis=ax2, range=0.1))
 
 plt.show()
