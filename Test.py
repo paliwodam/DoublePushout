@@ -45,9 +45,8 @@ class AnnoteFinder:
 
 
 fig = plt.figure(figsize=(10, 10))
-ax1 = fig.add_subplot(1, 2, 1)
-ax2 = fig.add_subplot(1, 2, 2)
-# ax.set_title('select nodes to navigate there')
+ax1 = fig.add_subplot(2, 1, 1)
+ax2 = fig.add_subplot(2, 1, 2)
 
 G = nx.petersen_graph()
 layout = nx.spring_layout(G, k=0.1, iterations=20)
