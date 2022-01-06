@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from pylab import *
 
 
 class AnnoteFinder:
@@ -31,11 +30,9 @@ class AnnoteFinder:
                 if selected:
                     x, y, annotation = selected
                     print("Selected", annotation)
-                    # plt.clf()
-                    # plt.show()
                     self.drawSelected(event.inaxes, x, y, annotation)
 
-    def drawSelected(self, axis, x, y, annote):
+    def drawSelected(self, axis, x, y):
         if (x, y) in self.selectedCircles:
             circle = self.selectedCircles[(x, y)]
             circle.set_visible(not circle.get_visible())
