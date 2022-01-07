@@ -28,40 +28,49 @@ class AnnoteFinder:
                         selected = (x, y, annotation)
 
                 if selected:
-                    x, y, annotation = selected
-                    print("Selected", annotation)
-                    self.drawSelected(event.inaxes, x, y)
+                    (x, y, annotation) = selected
+                    self.drawSelected(event.inaxes, x, y, annotation)
 
-    def drawSelected(self, axis, x, y):
-        if (x, y) in self.selectedCircles:
-            circle = self.selectedCircles[(x, y)]
+    def drawSelected(self, axis, x, y, annotation):
+        if (x, y, annotation) in self.selectedCircles:
+            circle = self.selectedCircles[(x, y, annotation)]
             circle.set_visible(not circle.get_visible())
         else:
             circle = axis.scatter(x+0.002, y+0.002, marker='o', s=200, linewidths=1,
                                   facecolors='none', edgecolors='red', zorder=-100)
-            self.selectedCircles[(x, y)] = circle
+            self.selectedCircles[(x, y, annotation)] = circle
 
         plt.show()
 
-
-fig = plt.figure(figsize=(10, 10))
-ax1 = fig.add_subplot(2, 1, 1)
-ax2 = fig.add_subplot(2, 1, 2)
-
-G = nx.petersen_graph()
-layout = nx.spring_layout(G, k=0.1, iterations=20)
-nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
-        node_size=2, with_labels=True, ax=ax1)
-
-plt.connect('button_press_event', AnnoteFinder(layout, axis=ax1, range=0.1))
-
-G = nx.petersen_graph()
-layout = nx.spring_layout(G, k=0.1, iterations=20)
-nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
-        node_size=2, with_labels=True, ax=ax2)
-
-plt.connect('button_press_event', AnnoteFinder(layout, axis=ax2, range=0.1))
-
-plt.show()
+    def getSelected(self):
+        selected = []
+        for x, y, i in self.selectedCircles:
+            if self.selectedCircles[(x, y, i)].get_visible():
+                selected.append(i)
+        return selected
 
 
+if __name__ == "__main__":
+    fig = plt.figure(figsize=(10, 10))
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax2 = fig.add_subplot(2, 1, 2)
+
+    G = nx.petersen_graph()
+    layout = nx.spring_layout(G, k=0.1, iterations=20)
+    nx.draw(G, layout, font_size=6, width=0.1,
+            node_color='#FFFFFF', node_size=5, ax=ax1)
+    nx.draw_networkx_labels(G, layout, ax=ax1)
+    nx.draw_networkx_edge_labels(G, layout, ax=ax1)
+
+    plt.connect('button_press_event', AnnoteFinder(
+        layout, axis=ax1, range=0.1))
+
+    G = nx.petersen_graph()
+    layout = nx.spring_layout(G, k=0.1, iterations=20)
+    nx.draw(G, layout, font_size=6, node_color='#A0CBE2', edge_color='#BB0000', width=0.1,
+            node_size=2, with_labels=True, ax=ax2)
+
+    plt.connect('button_press_event', AnnoteFinder(
+        layout, axis=ax2, range=0.1))
+
+    plt.show()
