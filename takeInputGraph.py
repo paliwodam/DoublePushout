@@ -2,7 +2,7 @@ import networkx as nx
 
 
 def takeInputGraph():
-    input = 'graph.txt'  # PLEASE CHANGE NAME OF THE INPUT FILE ﴾͡๏̯͡๏﴿
+    input = 'ex1.txt'  # PLEASE CHANGE NAME OF THE INPUT FILE ﴾͡๏̯͡๏﴿
 
     G = nx.Graph()
     productions = []
