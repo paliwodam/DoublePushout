@@ -1,4 +1,4 @@
-# import tkinter as tk
+
 from takeInputGraph import takeInputGraph
 from DPO import double_pushout
 from matplotlib.axes import Axes
@@ -16,6 +16,8 @@ class Manager:
         self.layout = None
         self.ax = self.fig.add_subplot(2, 1, 1)
         self.ax1 = [self.fig.add_subplot(2, 3, 4),self.fig.add_subplot(2, 3, 5), self.fig.add_subplot(2, 3, 6)]
+
+
 
     def next(self):
         self.curr_idx = (self.curr_idx + 1) % len(self.productions)
@@ -54,7 +56,7 @@ class Manager:
             self.layout = nx.spring_layout(self.G, pos=self.layout, k=0.1, iterations=20, seed=123)
             verts, edges = label_helper(self.G)
             nx.draw(self.G, self.layout, width=0.1,
-                    node_color='pink', alpha=0.9, node_size=300, ax= self.ax)
+                    node_color='lightsalmon', alpha=0.9, node_size=300, ax= self.ax)
             nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=8, ax=self.ax)
             nx.draw_networkx_edge_labels(self.G, self.layout, edge_labels=edges, ax=self.ax, font_size=8)
 
@@ -70,7 +72,7 @@ class Manager:
             # layout1 = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
             verts, edges = label_helper(self.productions[self.curr_idx][j])
             nx.draw(self.productions[self.curr_idx][j], layout1, font_size=8, width=0.1,
-                    node_color='pink', alpha=0.9, node_size=300, ax=self.ax1[j])
+                    node_color='lightsalmon', alpha=0.9, node_size=300, ax=self.ax1[j])
             nx.draw_networkx_labels(self.productions[self.curr_idx][j], layout1, font_size=6, labels=verts, ax=self.ax1[j])
             nx.draw_networkx_edge_labels(self.productions[self.curr_idx][j], layout1, edge_labels=edges, ax=self.ax1[j],
                                          font_size=8)
@@ -127,8 +129,8 @@ class AnnoteFinder:
             circle = self.selectedCircles[(x, y, annotation)]
             circle.set_visible(not circle.get_visible())
         else:
-            circle = axis.scatter(x+0.002, y+0.002, marker='o', s=380, linewidths=1,
-                                  facecolors='none', edgecolors='red', zorder=-100)
+            circle = axis.scatter(x, y, marker='o', s=550, linewidths=2,
+                                  facecolors='none', edgecolors='gold', zorder=-100)
             self.selectedCircles[(x, y, annotation)] = circle
 
         plt.show()
@@ -149,15 +151,17 @@ axprev = plt.axes([0.40, 0.05, 0.1, 0.025])
 axnext = plt.axes([0.60, 0.05, 0.1, 0.025])
 axapply = plt.axes([0.5, 0.05, 0.1, 0.025])
 
-bnext = Button(axnext, 'Next')
+
+bnext = Button(axnext, 'Next',color = 'bisque', hovercolor = 'tomato')
 bnext.on_clicked(lambda x: manager.next())
 
-bprev = Button(axprev, 'Previous')
+bprev = Button(axprev, 'Previous',color = 'bisque', hovercolor = 'tomato')
+bprev .label.set_fontsize(11)
 bprev.on_clicked(lambda x: manager.prev())
 
-bapply = Button(axapply, 'Apply')
+bapply = Button(axapply, 'Apply',color = 'bisque', hovercolor = 'tomato')
+bapply.label.set_fontsize(11)
 bapply.on_clicked(lambda x: manager.apply())
 
 manager.draw()
-
 plt.show()
