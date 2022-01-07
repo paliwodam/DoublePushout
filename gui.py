@@ -57,7 +57,7 @@ class Manager:
             verts, edges = label_helper(self.G)
             nx.draw(self.G, self.layout, width=0.1,
                     node_color='lightsalmon', alpha=0.9, node_size=300, ax= self.ax)
-            nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=8, ax=self.ax)
+            nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=10, ax=self.ax)
             nx.draw_networkx_edge_labels(self.G, self.layout, edge_labels=edges, ax=self.ax, font_size=8)
 
             self.annoteFinder = AnnoteFinder(self.layout, self.ax, range=0.1)
@@ -73,7 +73,7 @@ class Manager:
             verts, edges = label_helper(self.productions[self.curr_idx][j])
             nx.draw(self.productions[self.curr_idx][j], layout1, font_size=8, width=0.1,
                     node_color='lightsalmon', alpha=0.9, node_size=300, ax=self.ax1[j])
-            nx.draw_networkx_labels(self.productions[self.curr_idx][j], layout1, font_size=6, labels=verts, ax=self.ax1[j])
+            nx.draw_networkx_labels(self.productions[self.curr_idx][j], layout1, font_size=10, labels=verts, ax=self.ax1[j])
             nx.draw_networkx_edge_labels(self.productions[self.curr_idx][j], layout1, edge_labels=edges, ax=self.ax1[j],
                                          font_size=8)
 
