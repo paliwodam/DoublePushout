@@ -1,23 +1,30 @@
-
-from takeInputGraph import takeInputGraph
-from DPO import double_pushout
-from matplotlib.axes import Axes
+import networkx as nx
+from networkx.exception import NetworkXException
+from pylab import *
+from graph_selection import GraphSelection
+from input_graph import get_input_graph
+from dpo import double_pushout
 from isomorphism import get_isomorphism
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-class Manager:
-    def __init__(self, G, productions):
-        self.G = G
-        self.productions = productions
+class App:
+    def __init__(self, input):
+        self.G, self.productions = get_input_graph(input)
         self.curr_idx = 0
-        self.annoteFinder = None
-        self.fig = plt.figure(figsize=(10, 10))
-        self.layout = None
-        self.ax = self.fig.add_subplot(2, 1, 1)
-        self.ax1 = [self.fig.add_subplot(2, 3, 4),self.fig.add_subplot(2, 3, 5), self.fig.add_subplot(2, 3, 6)]
 
+        self.fig = plt.figure(figsize=(10, 8))
+        self.g_axis = self.fig.add_subplot(2, 1, 1)
+        self.p_axis = [self.fig.add_subplot(2, 3, 4 + i) for i in range(3)]
 
+        # Saved so they won't get garbage collected
+        self.button_prev = add_button([0.40, 0.05, 0.1, 0.025], "Previous", lambda _: self.prev())
+        self.button_apply = add_button([0.5, 0.05, 0.1, 0.025], "Apply", lambda _: self.apply())
+        self.button_next = add_button([0.60, 0.05, 0.1, 0.025], "Next", lambda _: self.next())
+
+        self.graph_selection = GraphSelection(self.g_axis)
+        plt.connect("button_press_event", self.graph_selection)
+
+        self.draw(redraw_g=True)
 
     def next(self):
         self.curr_idx = (self.curr_idx + 1) % len(self.productions)
@@ -40,128 +47,62 @@ class Manager:
         return self.productions[self.curr_idx][2]
 
     def apply(self):
-        mapping = get_isomorphism(self.get_L(), self.get_K(), self.get_G(), self.annoteFinder.get_selected())
+        mapping = get_isomorphism(self.get_L(), self.get_K(), self.get_G(), self.graph_selection.get_selected())
         if mapping is not None:
             double_pushout(self.get_G(), self.get_L(), self.get_K(), self.get_R(), mapping)
-            self.layout = None
-            self.draw()
+            self.draw(redraw_g=True)
 
-    def draw(self):
-        if self.layout is None:
-            self.ax.clear()
-            # try:
-            #     self.layout = nx.planar_layout(self.G)
-            # except NetworkXException:
-            #     self.layout = nx.spring_layout(self.G, k=0.1, iterations=20, seed=123)
-            self.layout = nx.spring_layout(self.G, pos=self.layout, k=0.1, iterations=20, seed=123)
-            verts, edges = label_helper(self.G)
-            nx.draw(self.G, self.layout, width=0.1,
-                    node_color='lightsalmon', alpha=0.9, node_size=300, ax= self.ax)
-            nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=10, ax=self.ax)
-            nx.draw_networkx_edge_labels(self.G, self.layout, edge_labels=edges, ax=self.ax, font_size=8)
-
-            self.annoteFinder = AnnoteFinder(self.layout, self.ax, range=0.1)
-            plt.connect('button_press_event', self.annoteFinder)
+    def draw(self, redraw_g=False):
+        if redraw_g:
+            self.g_axis.clear()
+            g_layout = nx.spring_layout(self.G, k=0.1, iterations=20, seed=123)
+            self.graph_selection.update(g_layout)
+            draw_graph(self.G, g_layout, self.g_axis)
 
         for j in range(3):
-            self.ax1[j].clear()
+            self.p_axis[j].clear()
+
+            # Try to layout planarly, if can't do spring layout
             try:
-                layout1 = nx.planar_layout(self.productions[self.curr_idx][j])
+                layout = nx.planar_layout(self.productions[self.curr_idx][j])
             except NetworkXException:
-                layout1 = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
-            # layout1 = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
-            verts, edges = label_helper(self.productions[self.curr_idx][j])
-            nx.draw(self.productions[self.curr_idx][j], layout1, font_size=8, width=0.1,
-                    node_color='lightsalmon', alpha=0.9, node_size=300, ax=self.ax1[j])
-            nx.draw_networkx_labels(self.productions[self.curr_idx][j], layout1, font_size=10, labels=verts, ax=self.ax1[j])
-            nx.draw_networkx_edge_labels(self.productions[self.curr_idx][j], layout1, edge_labels=edges, ax=self.ax1[j],
-                                         font_size=8)
+                layout = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
+
+            draw_graph(self.productions[self.curr_idx][j], layout, self.p_axis[j])
 
         plt.show()
 
-def label_helper(G):
-    verts = {}
-    for v in G.nodes:
-        verts[v] = G.nodes[v]['label']
 
-    edges = {}
-    for e in G.edges:
-        edges[e] = G[e[0]][e[1]]['label']
-    return verts, edges
-# root = tk.Tk()
+def draw_graph(g, layout, axis):
+    vert_labels = {}
+    for v in g.nodes:
+        vert_labels[v] = g.nodes[v]["label"]
 
-import networkx as nx
-from pylab import *
+    edge_labels = {}
+    for e in g.edges:
+        edge_labels[e] = g[e[0]][e[1]]["label"]
 
-
-
-class AnnoteFinder:
-    def __init__(self, layout, axis, range):
-        self.data = []
-        for i in layout:
-            self.data.append((layout[i], i))
-
-        self.range = range
-        self.axis = axis
-        self.selectedCircles = {}
-
-    def __call__(self, event):
-        if event.inaxes:
-            clickX = event.xdata
-            clickY = event.ydata
-            if self.axis == event.inaxes:
-                minimum_distance = float("inf")
-                selected = None
-
-                for (x, y), annotation in self.data:
-                    dx, dy = abs(x - clickX), abs(y - clickY)
-                    distance = dx * dx + dy * dy
-                    if dx <= self.range and dy <= self.range and distance < minimum_distance:
-                        minimum_distance = distance
-                        selected = (x, y, annotation)
-
-                if selected:
-                    (x, y, annotation) = selected
-                    self.draw_selected(event.inaxes, x, y, annotation)
-
-    def draw_selected(self, axis, x, y, annotation):
-        if (x, y, annotation) in self.selectedCircles:
-            circle = self.selectedCircles[(x, y, annotation)]
-            circle.set_visible(not circle.get_visible())
-        else:
-            circle = axis.scatter(x, y, marker='o', s=550, linewidths=2,
-                                  facecolors='none', edgecolors='gold', zorder=-100)
-            self.selectedCircles[(x, y, annotation)] = circle
-
-        plt.show()
-
-    def get_selected(self):
-        selected = []
-        for x, y, i in self.selectedCircles:
-            if self.selectedCircles[(x, y, i)].get_visible():
-                selected.append(i)
-        return selected
+    nx.draw(
+        g,
+        layout,
+        font_size=8,
+        width=0.1,
+        node_color="lightsalmon",
+        alpha=0.9,
+        node_size=300,
+        ax=axis,
+    )
+    nx.draw_networkx_labels(g, layout, font_size=10, labels=vert_labels, ax=axis)
+    nx.draw_networkx_edge_labels(g, layout, edge_labels=edge_labels, ax=axis, font_size=8)
 
 
+def add_button(position, label, callback):
+    axis = plt.axes(position)
+    button = Button(axis, label, color="bisque", hovercolor="tomato")
+    button.label.set_fontsize(11)
+    button.on_clicked(callback)
+    return button
 
-G,P = takeInputGraph()
-manager = Manager(G, P)
 
-axprev = plt.axes([0.40, 0.05, 0.1, 0.025])
-axnext = plt.axes([0.60, 0.05, 0.1, 0.025])
-axapply = plt.axes([0.5, 0.05, 0.1, 0.025])
-
-
-bnext = Button(axnext, 'Next',color = 'bisque', hovercolor = 'tomato')
-bnext.on_clicked(lambda x: manager.next())
-
-bprev = Button(axprev, 'Previous',color = 'bisque', hovercolor = 'tomato')
-bprev .label.set_fontsize(11)
-bprev.on_clicked(lambda x: manager.prev())
-
-bapply = Button(axapply, 'Apply',color = 'bisque', hovercolor = 'tomato')
-bapply.label.set_fontsize(11)
-bapply.on_clicked(lambda x: manager.apply())
-
-manager.draw()
-plt.show()
+app = App("ex2.txt")
+app.draw()
