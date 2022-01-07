@@ -37,7 +37,7 @@ def get_isomorphism(L, K, G, selected):
                     break
 
             if not edgeConnectedOutside:
-                return iso
+                return osi
 
 
 if __name__ == "__main__":
