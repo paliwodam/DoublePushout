@@ -47,6 +47,8 @@ class App:
         return self.productions[self.curr_idx][2]
 
     def apply(self):
+        if len(self.get_L().nodes) != len(self.graph_selection.get_selected()):
+            return
         mapping = get_isomorphism(self.get_L(), self.get_K(), self.get_G(), self.graph_selection.get_selected())
         if mapping is not None:
             double_pushout(self.get_G(), self.get_L(), self.get_K(), self.get_R(), mapping)
@@ -104,5 +106,5 @@ def add_button(position, label, callback):
     return button
 
 
-app = App("ex2.txt")
+app = App("ex1.txt")
 app.draw()

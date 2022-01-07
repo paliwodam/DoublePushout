@@ -5,6 +5,8 @@ class GraphSelection:
     def __init__(self, axis):
         self.axis = axis
         self.range = 0.1
+        self.data = []
+        self.selectedCircles = {}
 
     def __call__(self, event):
         if event.inaxes:
