@@ -54,9 +54,9 @@ class Manager:
             self.layout = nx.spring_layout(self.G, pos=self.layout, k=0.1, iterations=20, seed=123)
             verts, edges = label_helper(self.G)
             nx.draw(self.G, self.layout, width=0.1,
-                    node_color='pink', alpha=0.9, node_size=200, ax= self.ax)
-            nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=6, ax=self.ax)
-            nx.draw_networkx_edge_labels(self.G, self.layout, edge_labels=edges, ax=self.ax, font_size=6, font_color='red')
+                    node_color='pink', alpha=0.9, node_size=300, ax= self.ax)
+            nx.draw_networkx_labels(self.G, self.layout, labels=verts, font_size=8, ax=self.ax)
+            nx.draw_networkx_edge_labels(self.G, self.layout, edge_labels=edges, ax=self.ax, font_size=8)
 
             self.annoteFinder = AnnoteFinder(self.layout, self.ax, range=0.1)
             plt.connect('button_press_event', self.annoteFinder)
@@ -69,11 +69,11 @@ class Manager:
                 layout1 = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
             # layout1 = nx.spring_layout(self.productions[self.curr_idx][j], k=0.1, iterations=20, seed=123)
             verts, edges = label_helper(self.productions[self.curr_idx][j])
-            nx.draw(self.productions[self.curr_idx][j], layout1, font_size=6, width=0.1,
-                    node_color='pink', alpha=0.9, node_size=200, ax=self.ax1[j])
+            nx.draw(self.productions[self.curr_idx][j], layout1, font_size=8, width=0.1,
+                    node_color='pink', alpha=0.9, node_size=300, ax=self.ax1[j])
             nx.draw_networkx_labels(self.productions[self.curr_idx][j], layout1, font_size=6, labels=verts, ax=self.ax1[j])
             nx.draw_networkx_edge_labels(self.productions[self.curr_idx][j], layout1, edge_labels=edges, ax=self.ax1[j],
-                                         font_size=6, font_color='red')
+                                         font_size=8)
 
         plt.show()
 
@@ -127,7 +127,7 @@ class AnnoteFinder:
             circle = self.selectedCircles[(x, y, annotation)]
             circle.set_visible(not circle.get_visible())
         else:
-            circle = axis.scatter(x+0.002, y+0.002, marker='o', s=200, linewidths=1,
+            circle = axis.scatter(x+0.002, y+0.002, marker='o', s=380, linewidths=1,
                                   facecolors='none', edgecolors='red', zorder=-100)
             self.selectedCircles[(x, y, annotation)] = circle
 
