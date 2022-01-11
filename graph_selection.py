@@ -2,11 +2,12 @@ from matplotlib import pyplot as plt
 
 
 class GraphSelection:
-    def __init__(self, axis):
+    def __init__(self, axis, callback=None):
         self.axis = axis
         self.range = 0.1
         self.data = []
         self.selectedCircles = {}
+        self.callback = callback
 
     def __call__(self, event):
         if event.inaxes:
@@ -26,6 +27,7 @@ class GraphSelection:
                 if selected:
                     (x, y, annotation) = selected
                     self.draw_selected(event.inaxes, x, y, annotation)
+                    self.callback()
 
     def draw_selected(self, axis, x, y, annotation):
         if (x, y, annotation) in self.selectedCircles:

@@ -21,7 +21,9 @@ class App:
         self.button_apply = add_button([0.5, 0.05, 0.1, 0.025], "Apply", lambda _: self.apply())
         self.button_next = add_button([0.60, 0.05, 0.1, 0.025], "Next", lambda _: self.next())
 
-        self.graph_selection = GraphSelection(self.g_axis)
+        self.button_apply.ax.set_visible(False)
+
+        self.graph_selection = GraphSelection(self.g_axis, lambda: self.update_button_visibility())
         plt.connect("button_press_event", self.graph_selection)
 
         self.draw(redraw_g=True)
@@ -45,6 +47,11 @@ class App:
 
     def get_R(self):
         return self.productions[self.curr_idx][2]
+
+    def update_button_visibility(self):
+        a = len(self.get_L().nodes) == len(self.graph_selection.get_selected())
+        b = get_isomorphism(self.get_L(), self.get_K(), self.get_G(), self.graph_selection.get_selected()) is not None
+        self.button_apply.ax.set_visible(a and b)
 
     def apply(self):
         if len(self.get_L().nodes) != len(self.graph_selection.get_selected()):
@@ -72,6 +79,7 @@ class App:
 
             draw_graph(self.productions[self.curr_idx][j], layout, self.p_axis[j])
 
+        self.update_button_visibility()
         plt.show()
 
 
