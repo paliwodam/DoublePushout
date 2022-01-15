@@ -24,6 +24,7 @@ def get_input_graph(input):
             G.add_edge(vert1, vert2)
             G[vert1][vert2]["label"] = label
 
+        fp.readline()
         # OPIS PRODUKCJI
         np = int(fp.readline())  # amount of productions
         for am in range(np):

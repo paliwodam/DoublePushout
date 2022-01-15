@@ -58,6 +58,8 @@ class App:
 
     def apply(self):
         if len(self.get_L().nodes) != len(self.graph_selection.get_selected()):
+            plt.xlabel("Nieprawidłowa ilość wierzchołków")
+            plt.show()
             return
 
         mapping = get_isomorphism(self.get_L(), self.get_K(), self.get_G(), self.graph_selection.get_selected())
@@ -67,9 +69,13 @@ class App:
             double_pushout(new_G, self.get_L(), self.get_K(), self.get_R(), mapping)
             self.G_stack.append(new_G)
             self.draw(redraw_g=True)
+        else:
+            plt.xlabel("Nie można dokonać transformacji")
+            plt.show()
 
     def draw(self, redraw_g=False):
         if redraw_g:
+            plt.xlabel(" ")
             self.g_axis.clear()
             g_layout = nx.spring_layout(self.get_G(), k=0.1, iterations=20, seed=123)
             self.graph_selection.update(g_layout)
