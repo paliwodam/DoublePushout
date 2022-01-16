@@ -43,7 +43,6 @@
 2
 0 I
 1 J
-# Produkcje
 1
 0 1 k17
 4
