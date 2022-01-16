@@ -126,7 +126,7 @@ def add_button(position, label, callback):
     return button
 
 def main():
-    args = sys.argv[1:]
+    args = sys.argv[1]
     app = App(args)
     app.draw()
 
