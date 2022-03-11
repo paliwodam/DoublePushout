@@ -126,8 +126,9 @@ def add_button(position, label, callback):
     return button
 
 def main():
-    args = sys.argv[1]
-    app = App(args)
+    # args = sys.argv[1]
+    # app = App(args)
+    app = App("ex1.txt")
     app.draw()
 
 if __name__ == "__main__":
